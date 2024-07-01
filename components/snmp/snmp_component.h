@@ -39,18 +39,19 @@ class SNMPComponent : public Component {
   SNMPAgent snmp_agent_;
 
   void setup_system_mib_();
-  void setup_storage_mib_();
-#ifdef USE_ESP32
-  void setup_esp32_heap_mib_();
-#endif
-#ifdef USE_ESP8266
-  void setup_esp8266_heap_mib_();
-#endif
+  void setup_apc_ups_mib_();
+///  void setup_storage_mib_();
+///#ifdef USE_ESP32
+///  void setup_esp32_heap_mib_();
+///#endif
+///#ifdef USE_ESP8266
+///  void setup_esp8266_heap_mib_();
+///#endif
   void setup_chip_mib_();
   void setup_wifi_mib_();
-#ifdef USE_ESP32
-  static int setup_psram_size(int *used);
-#endif
+///#ifdef USE_ESP32
+///  static int setup_psram_size(int *used);
+///#endif
 
   static uint32_t get_uptime() { return millis() / 10; }
 
@@ -58,9 +59,9 @@ class SNMPComponent : public Component {
 
   static std::string get_bssid();
 
-#ifdef USE_ESP32
-  static int get_ram_size_kb();
-#endif
+//#ifdef USE_ESP32
+//  static int get_ram_size_kb();
+//#endif
 
   /// contact string
   std::string contact_;

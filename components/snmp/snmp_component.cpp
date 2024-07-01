@@ -15,6 +15,8 @@ namespace snmp {
 
 static const char *const TAG = "snmp";
 
+
+
 /// @brief Returns network uptime
 /// @return time in hundreds of seconds
 /// @warning 
@@ -28,8 +30,20 @@ uint32_t SNMPComponent::get_net_uptime() {
 #endif
 }
 
+
+
+void SNMPComponent::setup_apc_ups_mib_() {
+
+// firmware_revision
+  snmp_agent_.addDynamicReadOnlyStringHandler(CUSTOM_OID "2.6.0",, []() -> std::string { return App.get_text_sensors (&firmware_revision); });
+// last_battery_change_date
+  snmp_agent_.addDynamicReadOnlyStringHandler(CUSTOM_OID "2.7.0",, []() -> std::string { return App.get_text_sensors (&last_battery_change_date); });
+}
+
+
+
 void SNMPComponent::setup_system_mib_() {
-  // sysDesc
+  // sysDescription
   const char *desc_fmt = "ESPHome version " ESPHOME_VERSION " compiled %s, Board " ESPHOME_BOARD;
   char description[128];
   snprintf(description, sizeof(description), desc_fmt, App.get_compilation_time().c_str());
@@ -57,90 +71,7 @@ void SNMPComponent::setup_system_mib_() {
   snmp_agent_.addReadOnlyStaticStringHandler(RFC1213_OID_sysLocation, location_);
 }
 
-#ifdef USE_ESP32
-/// @brief Gets PSI RAM size and usage
-/// @param used Pointer to a location where to store used memory value
-/// @return Size of PSI RAM or 0 if not present
-int SNMPComponent::setup_psram_size(int *used) {
-  int total_size = 0;
-  *used = 0;
 
-  size_t free_size = heap_caps_get_free_size(MALLOC_CAP_SPIRAM);
-  bool available = free_size > 0;
-
-  if (available) {
-    total_size = heap_caps_get_total_size(MALLOC_CAP_SPIRAM);
-    if (total_size > 0) {
-      *used = total_size - free_size;
-    }
-  }
-
-  return total_size;
-}
-#endif
-
-void SNMPComponent::setup_storage_mib_() {
-  //  hrStorageIndex
-  snmp_agent_.addReadOnlyIntegerHandler(".1.3.6.1.2.1.25.2.3.1.1.1", 1);
-
-  // hrStorageDesc
-  snmp_agent_.addReadOnlyStaticStringHandler(".1.3.6.1.2.1.25.2.3.1.3.1", "FLASH");
-
-  // hrAllocationUnit
-  snmp_agent_.addReadOnlyIntegerHandler(".1.3.6.1.2.1.25.2.3.1.4.1", 1);
-
-  // hrStorageSize
-  snmp_agent_.addDynamicIntegerHandler(".1.3.6.1.2.1.25.2.3.1.5.1",
-                                       []() -> int { return ESP.getFlashChipSize(); });  // NOLINT
-
-  // hrStorageUsed
-  snmp_agent_.addDynamicIntegerHandler(".1.3.6.1.2.1.25.2.3.1.6.1",
-                                       []() -> int { return ESP.getSketchSize(); });  // NOLINT
-
-  // SPI RAM
-
-  //  hrStorageIndex
-  snmp_agent_.addReadOnlyIntegerHandler(".1.3.6.1.2.1.25.2.3.1.1.2", 2);
-
-  // hrStorageDesc
-  snmp_agent_.addReadOnlyStaticStringHandler(".1.3.6.1.2.1.25.2.3.1.3.2", "SPI RAM");
-
-  // hrAllocationUnit
-  snmp_agent_.addReadOnlyIntegerHandler(".1.3.6.1.2.1.25.2.3.1.4.2", 1);
-
-#ifdef USE_ESP32
-  // hrStorageSize
-  snmp_agent_.addDynamicIntegerHandler(".1.3.6.1.2.1.25.2.3.1.5.2", []() -> int {
-    int u;
-    return setup_psram_size(&u);
-  });
-
-  // hrStorageUsed
-  snmp_agent_.addDynamicIntegerHandler(".1.3.6.1.2.1.25.2.3.1.6.2", []() -> int {
-    int u;
-    setup_psram_size(&u);
-    return u;
-  });
-#endif
-
-#ifdef USE_ESP8266
-  // hrStorageSize
-  snmp_agent_.addReadOnlyIntegerHandler(".1.3.6.1.2.1.25.2.3.1.5.2", 0);
-
-  // hrStorageUsed
-  snmp_agent_.addReadOnlyIntegerHandler(".1.3.6.1.2.1.25.2.3.1.6.2", 0);
-
-#endif
-
-  // hrMemorySize [kb]
-#ifdef USE_ESP32
-  snmp_agent_.addReadOnlyIntegerHandler(".1.3.6.1.2.1.25.2.2", get_ram_size_kb());
-#endif
-
-#ifdef USE_ESP8266
-  snmp_agent_.addReadOnlyIntegerHandler(".1.3.6.1.2.1.25.2.2", 160);
-#endif
-}
 
 std::string SNMPComponent::get_bssid() {
   char buf[30];
@@ -149,33 +80,7 @@ std::string SNMPComponent::get_bssid() {
   return buf;
 }
 
-#if USE_ESP32
-void SNMPComponent::setup_esp32_heap_mib_() {
-  // heap size
-  snmp_agent_.addDynamicIntegerHandler(CUSTOM_OID "32.1.0", []() -> int { return ESP.getHeapSize(); });
 
-  // free heap
-  snmp_agent_.addDynamicIntegerHandler(CUSTOM_OID "32.2.0", []() -> int { return ESP.getFreeHeap(); });
-
-  // min free heap
-  snmp_agent_.addDynamicIntegerHandler(CUSTOM_OID "32.3.0", []() -> int { return ESP.getMinFreeHeap(); });
-
-  // max alloc heap
-  snmp_agent_.addDynamicIntegerHandler(CUSTOM_OID "32.4.0", []() -> int { return ESP.getMaxAllocHeap(); });
-}
-#endif
-
-#ifdef USE_ESP8266
-void SNMPComponent::setup_esp8266_heap_mib_() {
-  snmp_agent_.addDynamicIntegerHandler(CUSTOM_OID "8266.1.0", []() -> int { return ESP.getFreeHeap(); });  // NOLINT
-
-  snmp_agent_.addDynamicIntegerHandler(CUSTOM_OID "8266.2.0",
-                                       []() -> int { return ESP.getHeapFragmentation(); });  // NOLINT
-
-  snmp_agent_.addDynamicIntegerHandler(CUSTOM_OID "8266.3.0",
-                                       []() -> int { return ESP.getMaxFreeBlockSize(); });  // NOLINT
-}
-#endif
 
 void SNMPComponent::setup_chip_mib_() {
   // esp32/ esp8266
@@ -213,9 +118,9 @@ void SNMPComponent::setup_chip_mib_() {
 #if ESP8266
   snmp_agent_.addReadOnlyIntegerHandler(CUSTOM_OID "2.5.0", 0 /*no data for ESP8266*/);
 #endif
-
-
 }
+
+
 
 void SNMPComponent::setup_wifi_mib_() {
   // RSSI
@@ -236,6 +141,8 @@ void SNMPComponent::setup_wifi_mib_() {
         return ip_array.size() ? wifi::global_wifi_component->wifi_sta_ip_addresses()[0].str() : ""; } );
 }
 
+
+
 void SNMPComponent::setup() {
   ESP_LOGCONFIG(TAG, "Setting up SNMP...");
 
@@ -250,13 +157,7 @@ void SNMPComponent::setup() {
   snmp_agent_.addDynamicReadOnlyTimestampHandler(".1.3.6.1.2.1.25.1.1.0", get_uptime);
 
   setup_system_mib_();
-  setup_storage_mib_();
-#if USE_ESP32
-  setup_esp32_heap_mib_();
-#endif
-#if USE_ESP8266
-  setup_esp8266_heap_mib_();
-#endif
+  setup_apc_ups_mib_();
   setup_chip_mib_();
   setup_wifi_mib_();
 
@@ -266,51 +167,18 @@ void SNMPComponent::setup() {
   snmp_agent_.begin();
 }
 
+
+
 void SNMPComponent::dump_config() {
   ESP_LOGCONFIG(TAG, "SNMP Config:");
   ESP_LOGCONFIG(TAG, "  Contact: \"%s\"", contact_.c_str());
   ESP_LOGCONFIG(TAG, "  Location: \"%s\"", location_.c_str());
 }
 
+
 void SNMPComponent::loop() { snmp_agent_.loop(); }
 
-#if USE_ESP32
-int SNMPComponent::get_ram_size_kb() {
-  // use hardcoded values (number of values in esp_chip_model_t depends on IDF version)
-  // from esp_system.h
-  const int chip_esp32 = 1;
-  const int chip_esp32_s2 = 2;
-  const int chip_esp32_s3 = 9;
-  const int chip_esp32_c3 = 5;
-  const int chip_esp32_h2 = 6;
-  const int chip_esp32_c2 = 12;
-  const int chip_esp32_c6 = 13;
 
-  esp_chip_info_t chip_info;
-  esp_chip_info(&chip_info);
-
-  switch ((int) chip_info.model) {
-    case chip_esp32:
-      return 520;
-
-    case chip_esp32_s2:
-      return 320;
-
-    case chip_esp32_s3:
-      return 512;
-
-    case chip_esp32_c2:
-    case chip_esp32_c3:
-    case chip_esp32_c6:
-      return 400;
-
-    case chip_esp32_h2:
-      return 256;
-  }
-
-  return 0;
-}
-#endif
 
 }  // namespace snmp
 }  // namespace esphome
