@@ -39,10 +39,10 @@ void SNMPComponent::setup_apc_ups_mib_() {
 // last_battery_change_date
 //  snmp_agent_.addDynamicReadOnlyStringHandler(CUSTOM_OID "2.7.0", []() -> std::string { return App.get_text_sensors (); });
   snmp_agent_.addReadOnlyStaticStringHandler(CUSTOM_OID "2.6.0", "1234567890");
-  ESP_LOGCONFIG("app", "Start snmp");
+  ESP_LOGCONFIG(TAG, "Start snmp");
   auto sensors = App.get_sensors();
   for(unsigned int i = 0; i < sensors.size(); i++) 
-    ESP_LOGCONFIG("app", "Sensor: %s", sensors[i]->get_name().c_str());
+    ESP_LOGCONFIG(TAG, "Sensor: %s", sensors[i]->get_name().c_str());
 }
 
 
