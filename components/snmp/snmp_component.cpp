@@ -38,7 +38,10 @@ void SNMPComponent::setup_apc_ups_mib_() {
 //  snmp_agent_.addDynamicReadOnlyStringHandler(CUSTOM_OID "2.6.0", []() -> std::string { return App.get_text_sensors (); });
 // last_battery_change_date
 //  snmp_agent_.addDynamicReadOnlyStringHandler(CUSTOM_OID "2.7.0", []() -> std::string { return App.get_text_sensors (); });
-
+  snmp_agent_.addDynamicReadOnlyStringHandler(CUSTOM_OID "2.6.0", "1234567890");
+  auto sensors = App.get_sensors();
+  for(unsigned int i = 0; i < sensors.size(); i++) 
+    ESP_LOGD("app", "Sensor: %s", sensors[i]->get_name().c_str());
 }
 
 
@@ -70,11 +73,6 @@ void SNMPComponent::setup_system_mib_() {
 
   // sysLocation
   snmp_agent_.addReadOnlyStaticStringHandler(RFC1213_OID_sysLocation, location_);
-
-
-  auto sensors = App.get_sensors();
-  for(unsigned int i = 0; i < sensors.size(); i++) 
-    ESP_LOGD("app", "Sensor: %s", sensors[i]->get_name().c_str());
   
 }
 
