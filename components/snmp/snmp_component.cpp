@@ -35,9 +35,9 @@ uint32_t SNMPComponent::get_net_uptime() {
 void SNMPComponent::setup_apc_ups_mib_() {
 
 // firmware_revision
-  snmp_agent_.addDynamicReadOnlyStringHandler(CUSTOM_OID "2.6.0", []() -> std::string { return App.get_text_sensor_by_key (firmware_revision, 0); });
+  snmp_agent_.addDynamicReadOnlyStringHandler(CUSTOM_OID "2.6.0", []() -> std::string { return App.get_text_sensor_by_key ("firmware_revision", 0); });
 // last_battery_change_date
-  snmp_agent_.addDynamicReadOnlyStringHandler(CUSTOM_OID "2.7.0", []() -> std::string { return App.get_text_sensor_by_key (last_battery_change_date, 0); });
+  snmp_agent_.addDynamicReadOnlyStringHandler(CUSTOM_OID "2.7.0", []() -> std::string { return App.get_text_sensor_by_key ("last_battery_change_date", 0); });
 }
 
 
