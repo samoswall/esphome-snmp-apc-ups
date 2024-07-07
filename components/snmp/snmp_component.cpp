@@ -186,7 +186,7 @@ void SNMPComponent::dump_config() {
 
   auto sensors = App.get_sensors();
   for(unsigned int i = 0; i < sensors.size(); i++) 
-    ESP_LOGCONFIG(TAG, "Sensor: %s", sensors[i]->get_name().c_str(), " | ", sensors[i]->get_state());
+    ESP_LOGCONFIG(TAG, "Sensor: %s | %s", sensors[i]->get_name().c_str(), sensors[i]->get_state());
 }
 
 
