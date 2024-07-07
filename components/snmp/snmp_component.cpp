@@ -34,7 +34,7 @@ uint32_t SNMPComponent::get_net_uptime() {
 
 void SNMPComponent::setup_apc_ups_mib_() {
 
-  auto sensors = App.get_sensors();
+/*  auto sensors = App.get_sensors();
   auto text_sensors = App.get_text_sensors();
   for(unsigned int i = 0; i < sensors.size(); i++) {
     if (text_sensors[i]->get_name().c_str()=="APC firmware revision") {
@@ -46,7 +46,7 @@ void SNMPComponent::setup_apc_ups_mib_() {
       // last_battery_change_date
       //snmp_agent_.addDynamicReadOnlyStringHandler(CUSTOM_OID "2.7.0", []() -> std::string { return text_sensors[i]->state; });
     }
-  }
+  }  */
 }
 
 
