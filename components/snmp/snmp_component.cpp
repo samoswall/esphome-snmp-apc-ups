@@ -40,7 +40,7 @@ void SNMPComponent::setup_apc_ups_mib_() {
     if (text_sensors[i]->get_name().c_str()=="APC firmware revision") {
       // firmware_revision
       //snmp_agent_.addDynamicReadOnlyStringHandler(CUSTOM_OID "2.6.0", []() -> std::string { return text_sensors[i]->state; });
-      ESP_LOGDEBUG(TAG, "Test");
+      ESP_LOGD(TAG, "Test");
     }  
     if (text_sensors[i]->get_name().c_str()=="APC cause of last transfer") {
       // last_battery_change_date
@@ -186,7 +186,7 @@ void SNMPComponent::dump_config() {
 
   auto sensors = App.get_sensors();
   for(unsigned int i = 0; i < sensors.size(); i++) 
-    ESP_LOGCONFIG(TAG, "Sensor: %s", sensors[i]->get_name().c_str(), sensors[i]->get_state().c_str());
+    ESP_LOGCONFIG(TAG, "Sensor: %s", sensors[i]->get_name().c_str(), sensors[i]->get_state());
 }
 
 
