@@ -39,11 +39,12 @@ void SNMPComponent::setup_apc_ups_mib_() {
   for(unsigned int i = 0; i < sensors.size(); i++) {
     if (text_sensors[i]->get_name().c_str()=="APC firmware revision") {
       // firmware_revision
-      snmp_agent_.addDynamicReadOnlyStringHandler(CUSTOM_OID "2.6.0", []() -> std::string { return text_sensors[i]->state; });
+      //snmp_agent_.addDynamicReadOnlyStringHandler(CUSTOM_OID "2.6.0", []() -> std::string { return text_sensors[i]->state; });
+      ESP_LOGDEBUG(TAG, "Test");
     }  
     if (text_sensors[i]->get_name().c_str()=="APC cause of last transfer") {
       // last_battery_change_date
-      snmp_agent_.addDynamicReadOnlyStringHandler(CUSTOM_OID "2.7.0", []() -> std::string { return text_sensors[i]->state; });
+      //snmp_agent_.addDynamicReadOnlyStringHandler(CUSTOM_OID "2.7.0", []() -> std::string { return text_sensors[i]->state; });
     }
   }
 }
@@ -183,9 +184,9 @@ void SNMPComponent::dump_config() {
   ESP_LOGCONFIG(TAG, "  Contact: \"%s\"", contact_.c_str());
   ESP_LOGCONFIG(TAG, "  Location: \"%s\"", location_.c_str());
 
-//  auto sensors = App.get_sensors();
-//  for(unsigned int i = 0; i < sensors.size(); i++) 
-//    ESP_LOGCONFIG(TAG, "Sensor: %s", sensors[i]->get_name().c_str(), sensors[i]->state);
+  auto sensors = App.get_sensors();
+  for(unsigned int i = 0; i < sensors.size(); i++) 
+    ESP_LOGCONFIG(TAG, "Sensor: %s", sensors[i]->get_name().c_str(), sensors[i]->get_state().c_str());
 }
 
 
